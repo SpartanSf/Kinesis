@@ -123,7 +123,19 @@ function ioControl.unListen(channel, name)
     end
 end
 
-local char_buffer = {{}}
+local window_width = ffi.new("int[1]")
+local window_height = ffi.new("int[1]")
+sdl.SDL_GetWindowSize(window, window_width, window_height)
+
+local char_width = drawer:get_char_width()
+local char_height = drawer:get_char_height()
+local cols = math.floor((window_width[0] / char_width) / 1.1)
+local rows = math.floor(window_height[0] / char_height)
+
+local char_buffer = {}
+for i = 1, rows do
+    char_buffer[i] = {}
+end
 
 local function scroll(charBuffer)
     for i = 1, #charBuffer - 1 do
@@ -143,7 +155,7 @@ local function writeChannelIo(data)
     local char_width = drawer:get_char_width()
     local char_height = drawer:get_char_height()
     local cols = math.floor((window_width[0] / char_width) / 1.1)
-    local rows = math.floor(window_height[0] / char_height)
+    local rows = math.floor((window_height[0] / char_height) / 1.1)
 
     if data and data ~= string.byte("\n") and data == bit.band(tonumber(data) or 0, 0xFF) then
         local char = string.char(data)
@@ -152,26 +164,24 @@ local function writeChannelIo(data)
             char_buffer[current_row] = {}
         end
 
-        if current_row <= rows then
-            table.insert(char_buffer[current_row], char)
-            current_col = current_col + 1
+        table.insert(char_buffer[current_row], char)
+        current_col = current_col + 1
 
-            if current_col > cols then
-                current_row = current_row + 1
-                current_col = 1
-                if current_row <= rows then
-                    char_buffer[current_row] = {}
-                end
+        if current_col > cols then
+            current_row = current_row + 1
+            current_col = 1
+
+            if current_row > rows then
+                scroll(char_buffer)
+                current_row = rows
             end
         end
-
     elseif data == string.byte("\n") then
         current_row = current_row + 1
         current_col = 1
         if current_row <= rows then
             char_buffer[current_row] = {}
         end
-
     elseif data == 0xFF33 then
         if current_col > 1 then
             table.remove(char_buffer[current_row], current_col - 1)
@@ -182,6 +192,10 @@ local function writeChannelIo(data)
             table.remove(char_buffer[current_row], current_col - 1)
             current_col = current_col - 1
         end
+    end
+    if current_row > rows then
+        scroll(char_buffer)
+        current_row = rows
     end
 end
 
@@ -247,6 +261,60 @@ function kFs.open(path, mode)
     return io.open(getPath(path), mode)
 end
 
+local function delete_recursive(path)
+    local attr = lfs.attributes(path)
+    if not attr then return false, "Path does not exist" end
+
+    if attr.mode == "directory" then
+        for entry in lfs.dir(path) do
+            if entry ~= "." and entry ~= ".." then
+                local full_path = path .. "/" .. entry
+                local ok, err = delete_recursive(full_path)
+                if not ok then return false, err end
+            end
+        end
+        return os.remove(path)
+    else
+        return os.remove(path)
+    end
+end
+
+function kFs.delete(path)
+    delete_recursive(getPath(path))
+    return lfs.rmdir(getPath(path))
+end
+
+function kFs.mkdir(path)
+    return lfs.mkdir(getPath(path))
+end
+
+function kFs.normalize(path)
+    return luapath.normalize(path)
+end
+
+function kFs.join(...)
+    return luapath.join(...)
+end
+
+function kFs.times(path)
+    return luapath.cdate(getPath(path)), luapath.mdate(getPath(path)), luapath.adate(getPath(path))
+end
+
+function kFs.splitext(path)
+    return luapath.splitext(path)
+end
+
+function kFs.splitpath(path)
+    return luapath.splitpath(path)
+end
+
+function kFs.copy(src, dest)
+    return luapath.copy(getPath(src), getPath(dest))
+end
+
+function kFs.rename(src, dest)
+    return luapath.rename(getPath(src), getPath(dest)) 
+end
 
 local function handleKey(channel, key)
     if key == sdl.SDLK_LSHIFT then
@@ -330,6 +398,18 @@ local function handleKey(channel, key)
     end
 end
 
+local function getSize()
+    local window_width = ffi.new("int[1]")
+    local window_height = ffi.new("int[1]")
+    sdl.SDL_GetWindowSize(window, window_width, window_height)
+
+    local char_width = drawer:get_char_width()
+    local char_height = drawer:get_char_height()
+    local cols = math.floor((window_width[0] / char_width) / 1.1)
+    local rows = math.floor((window_height[0] / char_height) / 1.1)
+    return cols, rows
+end
+
 local safe_env = {
     type = type,
     tostring = tostring,
@@ -378,7 +458,8 @@ local safe_env = {
     print = print,
     error = error,
     pcall = pcall,
-    xpcall = xpcall
+    xpcall = xpcall,
+    getSize = getSize,
 }
 safe_env._G = safe_env
 

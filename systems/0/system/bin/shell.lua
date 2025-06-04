@@ -1,4 +1,5 @@
 local function runFileShell(path, env, args)
+  if not kFs.exists(path) then return end
   local file = kFs.open(path, "r")
   local code = file:read("*a")
   file:close()

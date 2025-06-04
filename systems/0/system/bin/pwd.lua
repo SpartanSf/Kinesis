@@ -1,0 +1,1 @@
+term.write(kFs.currentdir())
