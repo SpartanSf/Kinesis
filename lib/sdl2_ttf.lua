@@ -63,5 +63,5 @@ SDL_Surface* TTF_RenderUTF8_Blended_Wrapped(TTF_Font* font, const char* text, SD
 
 -- On Windows it'll typically be SDL2_ttf.dll,
 -- on Linux/macOS it might be libSDL2_ttf.so / libSDL2_ttf.dylib
-local ttf = ffi.load(assert((...):gsub("[^\\/]+$", "") .. "SDL2_ttf.dll"))
+local ttf = ffi.load("./lib/SDL2_ttf.dll")
 return ttf
