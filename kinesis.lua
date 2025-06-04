@@ -330,6 +330,11 @@ local function handleKey(channel, key)
     end
 end
 
+local text = "Hello, world!"
+for i = 1, #text do
+    ioControl.put(0, text:byte(i))
+end
+
 local safe_env = {
     type = type,
     tostring = tostring,
