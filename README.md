@@ -4,7 +4,12 @@
 ![Lang](https://img.shields.io/github/languages/top/SpartanSf/Kinesis)
 ![Repo Size](https://img.shields.io/github/repo-size/SpartanSf/Kinesis)
 
-LuaJIT low-level computer emulator
+Computer emulator written in and running LuaJIT
+
+Specs:
+- Custom FS implementation
+- Low-level I/O channel based system communication
+- Classic 80x43 IBM VGA (size 8x14) emulated terminal
 
 The goal is for this to be cross-platform, but I would like to get it running first. So currently, only windows is guaranteed support.
 
@@ -12,4 +17,4 @@ The EEPROM (eeprom.lua) comes pre-packaged with kBoot, and currently KinesisOS i
 
 Docs soon, I promise
 
-![Screenshot 2025-06-03 224635](https://github.com/user-attachments/assets/69de9b8e-561b-4f46-9860-ad1a45374c97)
+![Screenshot 2025-06-04 235203](https://github.com/user-attachments/assets/a4a6a472-d28b-4e65-a0af-41fa42abdd09)
