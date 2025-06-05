@@ -3,11 +3,13 @@ local n = tonumber(args[2]) or 10
 
 local file = kFs.open(filename, "r")
 
-local count = 0
-for line in file:lines() do
-    term.write(line.."\n")
-    count = count + 1
-    if count >= n then break end
-end
+if file then
+    local count = 0
+    for line in file:lines() do
+        term.write(line.."\n")
+        count = count + 1
+        if count >= n then break end
+    end
 
-file:close()
+    file:close()
+else term.write("Invalid path") end

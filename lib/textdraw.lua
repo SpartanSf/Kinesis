@@ -60,8 +60,8 @@ function textdraw:draw_char(char, x, y)
 end
 
 function textdraw:draw_grid_char(char, cell_x, cell_y, mod_x, mod_y)
-    local char_width = self:get_char_width() * 1.1
-    local char_height = self:get_char_height() * 1.1
+    local char_width = self:get_char_width()
+    local char_height = self:get_char_height()
     local x = cell_x * char_width * (mod_x or 1)
     local y = cell_y * char_height * (mod_y or 1)
     self:draw_char(char, x, y)

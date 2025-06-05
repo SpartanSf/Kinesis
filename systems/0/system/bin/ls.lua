@@ -1,13 +1,17 @@
-local files = kFs.list(kFs.currentdir() .. "/" .. (args[1] or ""))
+local path = kFs.currentdir() .. "/" .. (args[1] or "")
 
-local maxlen = 0
+if kFs.exists(path) then
+  local files = kFs.list(path)
 
-for _,file in ipairs(files) do
-  if #file > maxlen then maxlen = #file end
-end
+  local maxlen = 0
 
-maxlen = maxlen + 2
+  for _,file in ipairs(files) do
+    if #file > maxlen then maxlen = #file end
+  end
 
-for _,file in ipairs(files) do -- one hell of a one-liner
-  term.write(file .. string.rep(" ", maxlen - #file) .. (kFs.isDir(kFs.currentdir() .. "/" .. (args[1] or "") .. "/" .. file) and "DIR" or "FILE") .. "\n")
-end
+  maxlen = maxlen + 2
+
+  for _,file in ipairs(files) do -- one hell of a one-liner
+    term.write(file .. string.rep(" ", maxlen - #file) .. (kFs.isDir(path .. "/" .. file) and "DIR" or "FILE") .. "\n")
+  end
+else term.write("Invalid path") end

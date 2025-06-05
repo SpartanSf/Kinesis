@@ -1,3 +1,5 @@
+local hiRes = false
+
 local path = arg and arg[0] or debug.getinfo(2, "S").source:sub(2)
 
 if not path:match("^/") and not path:match("^[A-Za-z]:[\\/]") then
@@ -44,7 +46,7 @@ assert(sdl.SDL_Init(sdl.SDL_INIT_VIDEO) == 0)
 
 local window = sdl.SDL_CreateWindow("Computer "..tostring(spec),
     sdl.SDL_WINDOWPOS_CENTERED, sdl.SDL_WINDOWPOS_CENTERED,
-    640, 480, bit.bor(sdl.SDL_WINDOW_SHOWN, sdl.SDL_WINDOW_RESIZABLE))
+    hiRes and 880 or 720, hiRes and 860 or 688, bit.bor(sdl.SDL_WINDOW_SHOWN, sdl.SDL_WINDOW_RESIZABLE))
 
 sdl.SDL_RaiseWindow(window)
 
@@ -55,7 +57,7 @@ sdl.SDL_FreeSurface(surface)
 local renderer = sdl.SDL_CreateRenderer(window, -1,
     sdl.SDL_RENDERER_ACCELERATED + sdl.SDL_RENDERER_PRESENTVSYNC)
 
-local drawer = textdraw.new(renderer, "assets/fontfile.ttf", 16)
+local drawer = textdraw.new(renderer, "assets/fontfile.ttf", hiRes and 22 or 18)
 
 local window_width = ffi.new("int[1]")
 local window_height = ffi.new("int[1]")
@@ -131,7 +133,7 @@ sdl.SDL_GetWindowSize(window, window_width, window_height)
 
 local char_width = drawer:get_char_width()
 local char_height = drawer:get_char_height()
-local cols = math.floor((window_width[0] / char_width) / 1.1)
+local cols = math.floor((window_width[0] / char_width))
 local rows = math.floor(window_height[0] / char_height)
 
 local char_buffer = {}
@@ -158,8 +160,8 @@ local function writeChannelIo(data)
 
     local char_width = drawer:get_char_width()
     local char_height = drawer:get_char_height()
-    local cols = math.floor((window_width[0] / char_width) / 1.1)
-    local rows = math.floor((window_height[0] / char_height) / 1.1)
+    local cols = math.floor((window_width[0] / char_width))
+    local rows = math.floor((window_height[0] / char_height))
 
     if data == 0xFF80 then
         waitDataCurX = true
@@ -530,7 +532,6 @@ local mainco = coroutine.create(function()
                     local char = line[col]
                     if char then
                         drawer:draw_grid_char(char, col - 1, row - 1, 1, 1)
-                        --drawer:draw_grid_char(char, col - 1, row - 1, 22/30, 1)
                     end
                 end
             end

@@ -110,7 +110,6 @@ function term.getSize()
   while not height do coroutine.yield() end
 
   ioControl.unListen(1, callbackIn)
-  print(width, height)
   return width, height
 end
 
