@@ -46,6 +46,8 @@ local window = sdl.SDL_CreateWindow("Computer "..tostring(spec),
     sdl.SDL_WINDOWPOS_CENTERED, sdl.SDL_WINDOWPOS_CENTERED,
     640, 480, bit.bor(sdl.SDL_WINDOW_SHOWN, sdl.SDL_WINDOW_RESIZABLE))
 
+sdl.SDL_RaiseWindow(window)
+
 local surface = image.IMG_Load("assets/logo.png")
 sdl.SDL_SetWindowIcon(window, surface)
 sdl.SDL_FreeSurface(surface)
@@ -146,6 +148,8 @@ end
 
 local current_row = 1
 local current_col = 1
+local waitDataCurX = false
+local waitDataCurY = false
 
 local function writeChannelIo(data)
     local window_width = ffi.new("int[1]")
@@ -157,7 +161,25 @@ local function writeChannelIo(data)
     local cols = math.floor((window_width[0] / char_width) / 1.1)
     local rows = math.floor((window_height[0] / char_height) / 1.1)
 
-    if data and data ~= string.byte("\n") and data == bit.band(tonumber(data) or 0, 0xFF) then
+    if data == 0xFF80 then
+        waitDataCurX = true
+    elseif waitDataCurX then
+        current_col = data
+        waitDataCurX = false
+    elseif data == 0xFF81 then
+        waitDataCurY = true
+    elseif waitDataCurY then
+        current_row = data - 1
+        waitDataCurY = false
+    elseif data == 0xFF82 then
+        ioControl.put(1, cols)
+    elseif data == 0xFF83 then
+        ioControl.put(1, rows)
+    elseif data == 0xFF84 then
+        ioControl.put(1, current_col)
+    elseif data == 0xFF85 then
+        ioControl.put(1, current_row)
+    elseif data and data ~= string.byte("\n") and data == bit.band(tonumber(data) or 0, 0xFF) then
         local char = string.char(data)
 
         if not char_buffer[current_row] then
@@ -297,7 +319,7 @@ function kFs.join(...)
 end
 
 function kFs.times(path)
-    return luapath.cdate(getPath(path)), luapath.mdate(getPath(path)), luapath.adate(getPath(path))
+    return luapath.ctime(getPath(path)), luapath.mtime(getPath(path)), luapath.atime(getPath(path))
 end
 
 function kFs.splitext(path)
@@ -314,6 +336,24 @@ end
 
 function kFs.rename(src, dest)
     return luapath.rename(getPath(src), getPath(dest)) 
+end
+
+function kFs.move(src, dest)
+    local srcFile = kFs.open(src, "r")
+    local destFile = kFs.open(dest, "w")
+    destFile:write(srcFile:read("*a"))
+    srcFile:close()
+    destFile:close()
+end
+
+function kFs.getSize(path)
+    return luapath.size(getPath(path))
+end
+
+local kOs = {}
+
+function kOs.getDate(timestamp)
+    return os.date("%Y-%m-%d %H:%M:%S", timestamp)
 end
 
 local function handleKey(channel, key)
@@ -392,22 +432,10 @@ local function handleKey(channel, key)
     elseif key == sdl.SDLK_SCROLLLOCK then
         ioControl.put(channel, 0xFF36)
     elseif key == sdl.SDLK_PAUSE then
-        ioControl.put(channel, 0xFF37)
+        ioControl.put(channel, 0xFF37) -- 0xFF80 for setting cursor x. 0xFF81 for cursor y.
     else
         ioControl.put(channel, bit.band(key or 0, 0xFFFF))
     end
-end
-
-local function getSize()
-    local window_width = ffi.new("int[1]")
-    local window_height = ffi.new("int[1]")
-    sdl.SDL_GetWindowSize(window, window_width, window_height)
-
-    local char_width = drawer:get_char_width()
-    local char_height = drawer:get_char_height()
-    local cols = math.floor((window_width[0] / char_width) / 1.1)
-    local rows = math.floor((window_height[0] / char_height) / 1.1)
-    return cols, rows
 end
 
 local safe_env = {
@@ -460,6 +488,11 @@ local safe_env = {
     pcall = pcall,
     xpcall = xpcall,
     getSize = getSize,
+    getDate = getDate,
+    os = {
+        getDate = kOs.getDate,
+        time = os.time
+    },
 }
 safe_env._G = safe_env
 
@@ -473,10 +506,10 @@ local mainco = coroutine.create(function()
                 running = false
             elseif event.type == sdl.SDL_KEYDOWN then
                 local key = event.key.keysym.sym
-                handleKey(1, key)
+                handleKey(2, key)
             elseif event.type == sdl.SDL_KEYUP then
                 local key = event.key.keysym.sym
-                handleKey(2, key)
+                handleKey(3, key)
             end
         end
 

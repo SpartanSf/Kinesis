@@ -15,9 +15,9 @@ local function basicInput()
       ioControl.put(0, data)
     end
   end
-  ioControl.listen(1, callback)
+  ioControl.listen(2, callback)
   while not pressed do coroutine.yield() end
-  ioControl.unListen(1, callback)
+  ioControl.unListen(2, callback)
   return pressed - 48
 end
 

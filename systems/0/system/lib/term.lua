@@ -82,12 +82,36 @@ function term.input(replace, newline)
     end
   end
 
-  ioControl.listen(1, callbackIn)
-  ioControl.listen(2, callbackOut)
+  ioControl.listen(2, callbackIn)
+  ioControl.listen(3, callbackOut)
   while running do coroutine.yield() end
-  ioControl.unListen(1, callbackIn)
-  ioControl.unListen(2, callbackOut)
+  ioControl.unListen(2, callbackIn)
+  ioControl.unListen(3, callbackOut)
   return table.concat(chars)
+end
+
+function term.setCursor(x, y)
+  ioControl.put(0, 0xFF80)
+  ioControl.put(0, x)
+  ioControl.put(0, 0xFF81)
+  ioControl.put(0, y)
+end
+
+function term.getSize()
+  local width, height
+  local function callbackIn(data)
+    if not width then width = data else height = data end
+  end
+
+  ioControl.listen(1, callbackIn)
+
+  ioControl.put(0, 0xFF82)
+  ioControl.put(0, 0xFF83)
+  while not height do coroutine.yield() end
+
+  ioControl.unListen(1, callbackIn)
+  print(width, height)
+  return width, height
 end
 
 --[[
