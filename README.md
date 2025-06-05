@@ -1,4 +1,8 @@
 # Kinesis
+![GitHub License](https://img.shields.io/github/license/SpartanSf/Kinesis)
+![Last Commit](https://img.shields.io/github/last-commit/SpartanSf/Kinesis)
+![Lang](https://img.shields.io/github/languages/top/SpartanSf/Kinesis)
+![Repo Size](https://img.shields.io/github/repo-size/SpartanSf/Kinesis)
 
 LuaJIT low-level computer emulator
 
