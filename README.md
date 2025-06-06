@@ -11,7 +11,9 @@ Specs:
 - Low-level I/O channel based system communication
 - Classic 80x43 IBM VGA (size 8x14) emulated terminal
 
-Launch via `launchKinesis.vbs`
+Launch via `launchKinesis.exe`
+
+Unfortunately, Windows detects `launchKinesis.exe` as a generic virus. This is due to the software I use, `Vbs To Exe`, see a similar case [here](https://github.com/pyinstaller/pyinstaller/issues/5668)
 
 The goal is for this to be cross-platform, but I would like to get it running first. So currently, only windows is guaranteed support.
 
