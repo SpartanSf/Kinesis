@@ -13,7 +13,7 @@ Specs:
 
 Launch via `launchKinesis.exe`
 
-Unfortunately, Windows detects `launchKinesis.exe` as a generic virus. This is due to the software I use, `Vbs To Exe`, see a similar case [here](https://github.com/pyinstaller/pyinstaller/issues/5668)
+Unfortunately, Windows detects `launchKinesis.exe` as a generic virus. This is due to the software I use, `Vbs To Exe`, see a similar case [here.](https://github.com/pyinstaller/pyinstaller/issues/5668) If you do not trust `launchKinesis.exe`, I have also included `launchKinesis.vbs`.
 
 The goal is for this to be cross-platform, but I would like to get it running first. So currently, only windows is guaranteed support.
 
