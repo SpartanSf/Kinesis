@@ -11,6 +11,8 @@ Specs:
 - Low-level I/O channel based system communication
 - Classic 80x43 IBM VGA (size 8x14) emulated terminal
 
+Launch via `launchKinesis.vbs`
+
 The goal is for this to be cross-platform, but I would like to get it running first. So currently, only windows is guaranteed support.
 
 The EEPROM (eeprom.lua) comes pre-packaged with kBoot, and currently KinesisOS is installed. You are completely free to wipe both or just KinesisOS and write your own.
