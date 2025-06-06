@@ -1,6 +1,7 @@
-local hiRes = false
+local hiRes = true
 
-local path = arg and arg[0] or debug.getinfo(2, "S").source:sub(2)
+local path = "kinesis.lua"
+local id = __PROVENV_ID
 
 if not path:match("^/") and not path:match("^[A-Za-z]:[\\/]") then
     local popen_cmd = package.config:sub(1,1) == "\\" and "cd" or "pwd"
@@ -30,17 +31,9 @@ local textdraw = require("lib.textdraw")
 local image = require("lib.sdl2_image")
 local json = require("lib.json")
 
-local id, spec
-    repeat
-    print("Enter a computer ID")
-    local userInput = io.read()
-
-    local nPath = luapath.join(lfs.currentdir(), "systems", userInput)
-    if lfs.attributes(nPath) then
-        id = luapath.normalize(nPath)
-        spec = luapath.normalize(userInput)
-    end
-until id
+local nPath = lfs.currentdir() .. "\\systems\\" .. id
+id = luapath.normalize(nPath)
+spec = luapath.normalize(id)
 
 assert(sdl.SDL_Init(sdl.SDL_INIT_VIDEO) == 0)
 
@@ -489,8 +482,6 @@ local safe_env = {
     error = error,
     pcall = pcall,
     xpcall = xpcall,
-    getSize = getSize,
-    getDate = getDate,
     os = {
         getDate = kOs.getDate,
         time = os.time
